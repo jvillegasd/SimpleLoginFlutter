@@ -19,11 +19,17 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider<User>(
         create: (context) => User(),
         child: Consumer<User>(builder: (context, currentUser, child) {
-          return MaterialApp(title: "Login", initialRoute: '/', routes: {
-            '/': (context) => Provider.of<User>(context, listen:false).isLogged? home : login,
-            '/home': (context) => home,
-            '/signin': (context) => signIn
-          });
+          if (Provider.of<User>(context, listen: false).isLogged) {
+            return MaterialApp(
+                title: "Home",
+                initialRoute: "/",
+                routes: {"/": (context) => home});
+          } else {
+            return MaterialApp(title: "Login", initialRoute: '/', routes: {
+              '/': (context) => login,
+              '/signin': (context) => signIn
+            });
+          }
         }));
   }
 }
