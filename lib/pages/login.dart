@@ -16,7 +16,7 @@ class LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _authentication("", ""));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _authentication("", "", false));
   }
 
   @override
@@ -48,7 +48,7 @@ class LoginState extends State<Login> {
                   String password = controllerPass.text;
                   controllerPass.clear();
                   controllerEmail.clear();
-                  _authentication(email, password);
+                  _authentication(email, password, true);
                 }
               },
               child: Text('Sign up')),
@@ -60,8 +60,8 @@ class LoginState extends State<Login> {
         ]));
   }
 
-  void _authentication(String email, String password) async {
-    if (Provider.of<User>(context, listen: false).userExists(email, password)) {
+  void _authentication(String email, String password, bool wantLog) async {
+    if (Provider.of<User>(context, listen: false).userExists(email, password)) { //If the process is not killed
       final prefs = await SharedPreferences.getInstance();
 
       prefs.setBool('isLogged', true);
@@ -70,13 +70,13 @@ class LoginState extends State<Login> {
     } else {
       final prefs = await SharedPreferences.getInstance();
 
-      final email = prefs.getString('email') ?? null;
-      final password = prefs.getString('password') ?? null;
+      final emailShared = prefs.getString('email') ?? null;
+      final passwordShared = prefs.getString('password') ?? null;
       final isLogged = prefs.getBool('isLogged') ?? false;
-      if (email.isEmpty || password.isEmpty) return;
-      if (isLogged) {
+      if (emailShared.isEmpty || passwordShared.isEmpty) return;
+      if (isLogged || wantLog) { //If logged in or the process was killed
         Provider.of<User>(context, listen: false).changeLoggedStatus(true);
-        Provider.of<User>(context, listen: false).changeData(email, password);
+        Provider.of<User>(context, listen: false).changeData(emailShared, passwordShared);
         Navigator.pushReplacementNamed(context, "/");
       }
     }
